@@ -2,8 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
-#from .terrain import generate_reference_and_limits
+from .terrain import generate_reference_and_limits
 import csv
+from .control import PD_controller
 
 class Submarine:
     def __init__(self):
@@ -116,10 +117,16 @@ class ClosedLoop:
         actions = np.zeros(T)
         self.plant.reset_state()
 
+        #initialising the initial error
+        e_0 = mission.reference[0]-self.plant.get_depth()
+
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            # Call your controller here
+            # Call your controller here, change x to be more helpful once type is determied
+            [e_0, u_t] = PD_controller(mission.reference[t],observation_t, e_0, 0.15, 0.6)
+            
+
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)
@@ -128,8 +135,9 @@ class ClosedLoop:
         disturbances = np.random.normal(0, variance, len(mission.reference))
         return self.simulate(mission, disturbances)
 
-#Initialise the class mission with empty arrays
+#Creating an instance of the class Mission with empty arrays
 Mission([],[],[])
 
 Mission.from_csv("mission")
 #Now Mission.reference has a list of all the refernce values, Mission.cave_depth has all of the depths and Mission.cave_height has all the heights in arrays
+

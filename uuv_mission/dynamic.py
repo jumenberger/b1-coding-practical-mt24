@@ -87,9 +87,16 @@ class Mission:
         # You are required to implement this method
         with open("data/%s.csv" % (file_name)) as file:
             for row in file:
-                Mission.reference.append(row.split()[0])
+                Mission.reference.append(row.split(',')[0])
+                Mission.cave_height.append(row.split(',')[1])
 
-        print(Mission.reference)
+                #Each row in the csv actually ends with /n, which we need to remove
+                full_value = row.split(',')[2]
+                shortened_value = full_value[:-1]
+                Mission.cave_depth.append(shortened_value)
+
+        return Mission
+
 
         pass
 
@@ -123,4 +130,6 @@ class ClosedLoop:
 
 #Initialise the class mission with empty arrays
 Mission([],[],[])
+
 Mission.from_csv("mission")
+#Now Mission.reference has a list of all the refernce values, Mission.cave_depth has all of the depths and Mission.cave_height has all the heights in arrays

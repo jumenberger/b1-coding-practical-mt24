@@ -2,7 +2,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
-from .terrain import generate_reference_and_limits
+#from .terrain import generate_reference_and_limits
+import csv
 
 class Submarine:
     def __init__(self):
@@ -68,6 +69,14 @@ class Mission:
     cave_height: np.ndarray
     cave_depth: np.ndarray
 
+    #Initialising the arrays
+    @classmethod
+    def __init__(self, reference, cave_height, cave_depth):
+        self.reference = reference
+        self.cave_height = cave_height
+        self.cave_depth = cave_depth
+
+
     @classmethod
     def random_mission(cls, duration: int, scale: float):
         (reference, cave_height, cave_depth) = generate_reference_and_limits(duration, scale)
@@ -76,6 +85,12 @@ class Mission:
     @classmethod
     def from_csv(cls, file_name: str):
         # You are required to implement this method
+        with open("data/%s.csv" % (file_name)) as file:
+            for row in file:
+                Mission.reference.append(row.split()[0])
+
+        print(Mission.reference)
+
         pass
 
 
@@ -105,3 +120,7 @@ class ClosedLoop:
     def simulate_with_random_disturbances(self, mission: Mission, variance: float = 0.5) -> Trajectory:
         disturbances = np.random.normal(0, variance, len(mission.reference))
         return self.simulate(mission, disturbances)
+
+#Initialise the class mission with empty arrays
+Mission([],[],[])
+Mission.from_csv("mission")

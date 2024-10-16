@@ -2,9 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
-from .terrain import generate_reference_and_limits
+from terrain import generate_reference_and_limits
 import csv
-from .control import PD_controller
+from control import PD_controller
 
 class Submarine:
     def __init__(self):
@@ -88,14 +88,21 @@ class Mission:
         # You are required to implement this method
         with open("data/%s.csv" % (file_name)) as file:
             for row in file:
-                Mission.reference.append(row.split(',')[0])
-                Mission.cave_height.append(row.split(',')[1])
+                ref = row.split(',')[0]
+                if ref != 'reference':
+                    Mission.reference.append(float(ref))
+
+                height = row.split(',')[1]
+                if height != 'cave_height':
+                    Mission.cave_height.append(float(height))
 
                 #Each row in the csv actually ends with /n, which we need to remove
                 full_value = row.split(',')[2]
                 shortened_value = full_value[:-1]
-                Mission.cave_depth.append(shortened_value)
-
+                if shortened_value != 'cave_depth':
+                    Mission.cave_depth.append(float(shortened_value))
+        
+       
         return Mission
 
 
@@ -103,9 +110,10 @@ class Mission:
 
 
 class ClosedLoop:
-    def __init__(self, plant: Submarine, controller):
+    #def __init__(self, plant: Submarine, controller):
+    def __init__(self, plant: Submarine):
         self.plant = plant
-        self.controller = controller
+        #self.controller = controller
 
     def simulate(self,  mission: Mission, disturbances: np.ndarray) -> Trajectory:
 
@@ -118,14 +126,16 @@ class ClosedLoop:
         self.plant.reset_state()
 
         #initialising the initial error
-        e_0 = mission.reference[0]-self.plant.get_depth()
+        e_0 = float(mission.reference[0])-float(self.plant.get_depth())
 
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
             # Call your controller here, change x to be more helpful once type is determied
-            [e_0, u_t] = PD_controller(mission.reference[t],observation_t, e_0, 0.15, 0.6)
-            
+            Kp = 0.15
+            Kd = 0.6
+            [e_0, u_t] = PD_controller(mission.reference[t],observation_t, e_0, Kp, Kd)
+            actions[t] = u_t
 
             self.plant.transition(actions[t], disturbances[t])
 
@@ -141,3 +151,13 @@ Mission([],[],[])
 Mission.from_csv("mission")
 #Now Mission.reference has a list of all the refernce values, Mission.cave_depth has all of the depths and Mission.cave_height has all the heights in arrays
 
+
+##Code from Jupyter
+sub = Submarine()
+# Instantiate your controller (depending on your implementation)
+##closed_loop = ClosedLoop(sub, controller)
+closed_loop = ClosedLoop(sub)
+##mission = Mission.from_csv("path/to/file") # You must implement this method in the Mission class #Already Done
+
+trajectory = closed_loop.simulate_with_random_disturbances(Mission)
+trajectory.plot_completed_mission(Mission)

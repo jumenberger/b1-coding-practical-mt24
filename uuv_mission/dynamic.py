@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
+import csv
 
 class Submarine:
     def __init__(self):
@@ -75,12 +76,18 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
+        reference, cave_height, cave_depth = [], [], []
+        with open(file_name, newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                reference.append(float(row['reference']))
+                cave_height.append(float(row['cave_height']))
+                cave_depth.append(float(row['cave_depth']))
+        return cls(np.array(reference), np.array(cave_height), np.array(cave_depth))
 
 
 class ClosedLoop:
-    def __init__(self, plant: Submarine, controller):
+    def __init__(self, plant: Submarine, controller: Controller):
         self.plant = plant
         self.controller = controller
 
@@ -96,12 +103,16 @@ class ClosedLoop:
 
         for t in range(T):
             positions[t] = self.plant.get_position()
-            observation_t = self.plant.get_depth()
-            # Call your controller here
-            self.plant.transition(actions[t], disturbances[t])
+            observation_t = self.plant.get_depth()  # Get the current depth of the submarine
+            reference_t = mission.reference[t]     # Reference depth at time t
+            # Compute the control action using the controller
+            control_action = self.controller.control(reference_t, observation_t)
+            # Apply the control action along with the disturbance to the submarine
+            self.plant.transition(control_action, disturbances[t])
 
         return Trajectory(positions)
         
     def simulate_with_random_disturbances(self, mission: Mission, variance: float = 0.5) -> Trajectory:
         disturbances = np.random.normal(0, variance, len(mission.reference))
         return self.simulate(mission, disturbances)
+

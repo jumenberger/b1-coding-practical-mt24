@@ -1,7 +1,10 @@
 from __future__ import annotations
+
+import os
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 from .terrain import generate_reference_and_limits
 
 class Submarine:
@@ -74,9 +77,41 @@ class Mission:
         return cls(reference, cave_height, cave_depth)
 
     @classmethod
-    def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
+    def from_csv(cls, file_name: str | os.PathLike) -> Mission:
+        """Read mission data from a CSV file and return a Mission instance from it.
+
+        The CSV should have three headings: ``reference``, ``cave_height``, and
+        ``cave_depth``.
+
+        Parameters
+        ----------
+        file_name : str | os.PathLike
+            A filepath to the CSV file. Can be absolute, relative, or a URL.
+
+        Returns
+        -------
+        Mission
+            A new ``Mission`` instance initialised with the mission data from the CSV
+            file.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the file pointed to by ``file_name`` does not exist.
+        ValueError
+            If the CSV file is malformed.
+        """
+        mission_data = pd.read_csv(file_name)
+        try:
+            return Mission(
+                reference=mission_data["reference"].values,
+                cave_height=mission_data["cave_height"].values,
+                cave_depth=mission_data["cave_depth"].values,
+            )
+        except KeyError:
+            missing_columns = {"reference", "cave_height", "cave_depth"}.difference(set(mission_data.columns))
+            missing_columns_str = ", ".join(map(lambda column: f"`{column}`", missing_columns))
+            raise ValueError(f"Passed CSV file `{file_name}` is malformed. Missing columns: {missing_columns_str}")
 
 
 class ClosedLoop:

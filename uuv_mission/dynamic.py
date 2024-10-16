@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
 from uuv_mission.control import Controller
 import os
+import math
 
 class Submarine:
     def __init__(self):
@@ -63,6 +64,14 @@ class Trajectory:
         plt.plot(mission.reference, 'r', linestyle='--', label='Reference')
         plt.legend(loc='upper right')
         plt.show()
+    
+    def get_traj_error(self, mission: Mission):
+        traj_error = 0
+        T = len(mission.reference)
+        for t in range(T):
+            traj_error = traj_error + (mission.reference[t] - self.position[t, 1]) ** 2
+        return math.sqrt(traj_error)
+
 
 @dataclass
 class Mission:

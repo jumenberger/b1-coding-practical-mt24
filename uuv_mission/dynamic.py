@@ -85,7 +85,6 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
-        # You are required to implement this method
         with open("data/%s.csv" % (file_name)) as file:
             for row in file:
                 ref = row.split(',')[0]
@@ -105,8 +104,6 @@ class Mission:
        
         return Mission
 
-
-        pass
 
 
 class ClosedLoop:
@@ -131,9 +128,8 @@ class ClosedLoop:
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            # Call your controller here, change x to be more helpful once type is determied
-            Kp = 0.15
-            Kd = 0.6
+            Kp = 0.125
+            Kd = 0.65
             [e_0, u_t] = PD_controller(mission.reference[t],observation_t, e_0, Kp, Kd)
             actions[t] = u_t
 
@@ -145,19 +141,12 @@ class ClosedLoop:
         disturbances = np.random.normal(0, variance, len(mission.reference))
         return self.simulate(mission, disturbances)
 
-#Creating an instance of the class Mission with empty arrays
+#Initialse and create an instance of the Mission class
 Mission([],[],[])
-
 Mission.from_csv("mission")
-#Now Mission.reference has a list of all the refernce values, Mission.cave_depth has all of the depths and Mission.cave_height has all the heights in arrays
 
-
-##Code from Jupyter
+#Initialising the submarine and modeling it's course
 sub = Submarine()
-# Instantiate your controller (depending on your implementation)
-##closed_loop = ClosedLoop(sub, controller)
 closed_loop = ClosedLoop(sub)
-##mission = Mission.from_csv("path/to/file") # You must implement this method in the Mission class #Already Done
-
 trajectory = closed_loop.simulate_with_random_disturbances(Mission)
 trajectory.plot_completed_mission(Mission)

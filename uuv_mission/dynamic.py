@@ -128,7 +128,7 @@ class ClosedLoop:
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            Kp = 0.125
+            Kp = 0.1
             Kd = 0.65
             [e_0, u_t] = PD_controller(mission.reference[t],observation_t, e_0, Kp, Kd)
             actions[t] = u_t

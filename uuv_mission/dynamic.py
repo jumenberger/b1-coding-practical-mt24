@@ -2,7 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
-from .terrain import generate_reference_and_limits
+from terrain import generate_reference_and_limits
+import csv
+from control import PD_controller
 
 class Submarine:
     def __init__(self):
@@ -68,6 +70,14 @@ class Mission:
     cave_height: np.ndarray
     cave_depth: np.ndarray
 
+    #Initialising the arrays
+    @classmethod
+    def __init__(self, reference, cave_height, cave_depth):
+        self.reference = reference
+        self.cave_height = cave_height
+        self.cave_depth = cave_depth
+
+
     @classmethod
     def random_mission(cls, duration: int, scale: float):
         (reference, cave_height, cave_depth) = generate_reference_and_limits(duration, scale)
@@ -75,14 +85,32 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
+        with open("data/%s.csv" % (file_name)) as file:
+            for row in file:
+                ref = row.split(',')[0]
+                if ref != 'reference':
+                    Mission.reference.append(float(ref))
+
+                height = row.split(',')[1]
+                if height != 'cave_height':
+                    Mission.cave_height.append(float(height))
+
+                #Each row in the csv actually ends with /n, which we need to remove
+                full_value = row.split(',')[2]
+                shortened_value = full_value[:-1]
+                if shortened_value != 'cave_depth':
+                    Mission.cave_depth.append(float(shortened_value))
+        
+       
+        return Mission
+
 
 
 class ClosedLoop:
-    def __init__(self, plant: Submarine, controller):
+    #def __init__(self, plant: Submarine, controller):
+    def __init__(self, plant: Submarine):
         self.plant = plant
-        self.controller = controller
+        #self.controller = controller
 
     def simulate(self,  mission: Mission, disturbances: np.ndarray) -> Trajectory:
 
@@ -94,10 +122,17 @@ class ClosedLoop:
         actions = np.zeros(T)
         self.plant.reset_state()
 
+        #initialising the initial error
+        e_0 = float(mission.reference[0])-float(self.plant.get_depth())
+
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            # Call your controller here
+            Kp = 0.1
+            Kd = 0.65
+            [e_0, u_t] = PD_controller(mission.reference[t],observation_t, e_0, Kp, Kd)
+            actions[t] = u_t
+
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)
@@ -105,3 +140,13 @@ class ClosedLoop:
     def simulate_with_random_disturbances(self, mission: Mission, variance: float = 0.5) -> Trajectory:
         disturbances = np.random.normal(0, variance, len(mission.reference))
         return self.simulate(mission, disturbances)
+
+#Initialse and create an instance of the Mission class
+Mission([],[],[])
+Mission.from_csv("mission")
+
+#Initialising the submarine and modeling it's course
+sub = Submarine()
+closed_loop = ClosedLoop(sub)
+trajectory = closed_loop.simulate_with_random_disturbances(Mission)
+trajectory.plot_completed_mission(Mission)

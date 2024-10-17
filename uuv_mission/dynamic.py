@@ -105,10 +105,14 @@ class ClosedLoop:
 
         for t in range(T):
             positions[t] = self.plant.get_position()
-            observation_t = self.plant.get_depth()
-            # Call your controller here
+            observation = self.plant.get_depth()
+            reference = mission.reference[t]
+            #Computing the error term
+            error = reference-observation
+            #Apply the controller
+            actions[t]=self.controller.controller_action(error)
             self.plant.transition(actions[t], disturbances[t])
-
+            
         return Trajectory(positions)
         
     def simulate_with_random_disturbances(self, mission: Mission, variance: float = 0.5) -> Trajectory:

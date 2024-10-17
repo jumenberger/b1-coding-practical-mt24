@@ -77,7 +77,7 @@ class Mission:
     @classmethod
     def from_csv(cls, file_name: str):
         # You are required to implement this method
-        mission_data = pd.read_csv('mission.csv')
+        mission_data = pd.read_csv(file_name)
         pass
 
 

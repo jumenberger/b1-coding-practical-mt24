@@ -50,6 +50,3 @@ def write_mission_to_csv(mission, file_name):
     
     # Write the DataFrame to a CSV file
     df.to_csv(file_name, index=False)
-
-
-    

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
 
@@ -62,6 +63,9 @@ class Trajectory:
         plt.legend(loc='upper right')
         plt.show()
 
+# dataclass + classmethod: often used to create instances of a class from other data types, in this case we create 
+# instances of Mission class from csv data. Note how class methods call upon the class (cls) itself, not the instance
+# (self) .
 @dataclass
 class Mission:
     reference: np.ndarray
@@ -75,8 +79,18 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
+        """Function to convert a csv file into a Mission object.
+        
+        parameters:
+            file_name (str): the csv file name. Have to include .csv file extension.
+        """
         # You are required to implement this method
-        pass
+        FILE_PATH = f"../data/{file_name}"
+        df = pd.read_csv(FILE_PATH)
+        reference = df["reference"].to_numpy()
+        cave_height = df["cave_height"].to_numpy()
+        cave_depth = df["cave_depth"].to_numpy()
+        return cls(reference, cave_height, cave_depth)
 
 
 class ClosedLoop:

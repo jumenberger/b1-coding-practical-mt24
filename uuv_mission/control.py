@@ -1,4 +1,4 @@
-import numpy as np
+"""Python module for controller"""
 
 class Controller:
     """Class for controller of the submarine in the cave.
@@ -14,13 +14,17 @@ class Controller:
 
 
     def get_error(self, reference: float, depth: float) -> float:
+        """Get the error between reference signal and output signal."""
         return float(reference - depth)
 
 
     def get_action(self, reference: float, depth: float, last_error: float):
-        """get the current controller action (force in y-direction).
+        """Get the current controller action (force in y-direction).
         
-        parameters:
+        Parameters:
+            reference (float): reference depth given by the csv file
+            depth (float): current y position of submarine
+            last_error (float): error from last time step
         """
         error = self.get_error(reference, depth)
         action = self._kp * error + self._kd * (error - last_error)

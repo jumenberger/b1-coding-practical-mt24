@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
 
+
 class Submarine:
     def __init__(self):
 
@@ -11,13 +12,12 @@ class Submarine:
         self.drag = 0.1
         self.actuator_gain = 1
 
-        self.dt = 1 # Time step for discrete time simulation
+        self.dt = 1  # Time step for discrete time simulation
 
         self.pos_x = 0
         self.pos_y = 0
-        self.vel_x = 1 # Constant velocity in x direction
+        self.vel_x = 1  # Constant velocity in x direction
         self.vel_y = 0
-
 
     def transition(self, action: float, disturbance: float):
         self.pos_x += self.vel_x * self.dt
@@ -29,20 +29,21 @@ class Submarine:
 
     def get_depth(self) -> float:
         return self.pos_y
-    
+
     def get_position(self) -> tuple:
         return self.pos_x, self.pos_y
-    
+
     def reset_state(self):
         self.pos_x = 0
         self.pos_y = 0
         self.vel_x = 1
         self.vel_y = 0
-    
+
+
 class Trajectory:
     def __init__(self, position: np.ndarray):
-        self.position = position  
-        
+        self.position = position
+
     def plot(self):
         plt.plot(self.position[:, 0], self.position[:, 1])
         plt.show()
@@ -52,15 +53,28 @@ class Trajectory:
         min_depth = np.min(mission.cave_depth)
         max_height = np.max(mission.cave_height)
 
-        plt.fill_between(x_values, mission.cave_height, mission.cave_depth, color='blue', alpha=0.3)
-        plt.fill_between(x_values, mission.cave_depth, min_depth*np.ones(len(x_values)), 
-                         color='saddlebrown', alpha=0.3)
-        plt.fill_between(x_values, max_height*np.ones(len(x_values)), mission.cave_height, 
-                         color='saddlebrown', alpha=0.3)
-        plt.plot(self.position[:, 0], self.position[:, 1], label='Trajectory')
-        plt.plot(mission.reference, 'r', linestyle='--', label='Reference')
-        plt.legend(loc='upper right')
+        plt.fill_between(
+            x_values, mission.cave_height, mission.cave_depth, color="blue", alpha=0.3
+        )
+        plt.fill_between(
+            x_values,
+            mission.cave_depth,
+            min_depth * np.ones(len(x_values)),
+            color="saddlebrown",
+            alpha=0.3,
+        )
+        plt.fill_between(
+            x_values,
+            max_height * np.ones(len(x_values)),
+            mission.cave_height,
+            color="saddlebrown",
+            alpha=0.3,
+        )
+        plt.plot(self.position[:, 0], self.position[:, 1], label="Trajectory")
+        plt.plot(mission.reference, "r", linestyle="--", label="Reference")
+        plt.legend(loc="upper right")
         plt.show()
+
 
 @dataclass
 class Mission:
@@ -70,7 +84,9 @@ class Mission:
 
     @classmethod
     def random_mission(cls, duration: int, scale: float):
-        (reference, cave_height, cave_depth) = generate_reference_and_limits(duration, scale)
+        (reference, cave_height, cave_depth) = generate_reference_and_limits(
+            duration, scale
+        )
         return cls(reference, cave_height, cave_depth)
 
     @classmethod
@@ -84,12 +100,14 @@ class ClosedLoop:
         self.plant = plant
         self.controller = controller
 
-    def simulate(self,  mission: Mission, disturbances: np.ndarray) -> Trajectory:
+    def simulate(self, mission: Mission, disturbances: np.ndarray) -> Trajectory:
 
         T = len(mission.reference)
         if len(disturbances) < T:
-            raise ValueError("Disturbances must be at least as long as mission duration")
-        
+            raise ValueError(
+                "Disturbances must be at least as long as mission duration"
+            )
+
         positions = np.zeros((T, 2))
         actions = np.zeros(T)
         self.plant.reset_state()
@@ -101,7 +119,9 @@ class ClosedLoop:
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)
-        
-    def simulate_with_random_disturbances(self, mission: Mission, variance: float = 0.5) -> Trajectory:
+
+    def simulate_with_random_disturbances(
+        self, mission: Mission, variance: float = 0.5
+    ) -> Trajectory:
         disturbances = np.random.normal(0, variance, len(mission.reference))
         return self.simulate(mission, disturbances)

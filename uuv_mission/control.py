@@ -1,9 +1,9 @@
 # implementation of a PD controller
 def controller(y0, y1, r0, r1):
 	# proportional gain
-	Kp = 0.15
+	Kp = 0.18
 	# derivative gain
-	Kd = 0.6
+	Kd = 0.65
 	# error
 	e0 = r0 - y0
 	e1 = r1 - y1

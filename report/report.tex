@@ -1,0 +1,66 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{titling}
+\usepackage{graphicx} % Required for inserting images
+\usepackage[htt]{hyphenat}
+
+\setlength{\droptitle}{-10em}
+
+\title{Implementation of closed-loop control for UUV}
+\author{Jin Rhee}
+\date{18 October 2024}
+
+\begin{document}
+
+\maketitle
+% Background and motivation
+\paragraph{Background} This report describes work done as the coding practical of B1 Scientific Computing in Michaelmas Term 2024.
+The motivation is to develop a controller for closed-loop control of an uncrewed underwater vehicle (UUV) given mission data and submarine dynamics.
+
+% Problem definition
+\paragraph{Problem definition} Two tasks are defined:
+1. to create a function to import mission data from an external \texttt{.csv} file, and
+2. to implement and test a PD feedback controller.
+
+% List of changes made to codebase
+\paragraph{Key changes}
+Changes made to files within \texttt{/uuv\_mission} include:
+1. implement \texttt{Mission.from\_csv()} to import \texttt{.csv} mission data,
+2. implement a PD (proportional-derivative) controller as the \texttt{Controller} class,
+3. complete \texttt{ClosedLoop.simulate()}, and
+4. add \texttt{Trajectory.get\_traj\_error()} which returns trajectory error to use in control gain tuning.
+\par
+Changes to other files include a new bash script that conveniently imports Python modules, and a
+test unit within \texttt{notebooks/demo.ipynb} which tests and determines optimal control gains with the
+lowest trajectory error.
+
+%1. adding installation script for convenient import of python modules
+%2. implementing PD controller as Controller class in separate module (uuv_mission/control.py)
+%3. completing simulate() function within ClosedLoop class (uuv_mission/dynamic.py)
+%. adding get_traj_error() function within Trajectory class to quantify trajectory error for testing control gain
+
+% Explain design choices
+\paragraph{Design choices}
+1. The controller is implemented as a Class rather than a function such that future iterations that use different 
+control schemes can be implemented as a method within the Class. It has three internal variables, with 
+\texttt{prev\_error} initially set to 0 at time zero and the respective gains being set to the suggested values 
+given in the handout. Functions \texttt{set\_gains()} and \texttt{set\_prev\_error()} allow the user to 'reset' 
+a class instance for reuse rather than constructing a new instance.
+2. The function \texttt{get\_traj\_error()} returns the root of squared error sums for a trajectory as to 'normalize'
+possibly negative error values. This is sampled and averaged over a number of iterations for one control gain pair
+to compare with another.
+3. The \texttt{./install\_requirements} script was created for the user to easily install Python dependencies.
+While somewhat redundant in its current state, other processes (such as virtual env setup) could be automated by this
+ script in future iterations for further convenience.
+
+% Difficulties, future improvements
+\paragraph{Difficulties and future work}
+One inconvenience when implementing the trajectory error function involves the error state, which is internally
+computed within a \texttt{ClosedLoop} instance at each timestep, which is inaccessible. Thus the error (reference - depth)
+value must be recomputed within \texttt{Trajectory.get\_traj\_error()} at each timestep, representing an inefficiency.
+Future work could solve this by restructuring the code.
+Other work could involve improving the setup script,
+implementing other modes of control (PID, MPC, etc.) within the \texttt{Controller} class,
+implementing other heuristic tuning methods (i.e. Ziegler-Nichols method),
+and implementing such tuning methods as a separate function or class.
+\end{document}

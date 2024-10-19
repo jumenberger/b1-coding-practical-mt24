@@ -77,7 +77,8 @@ class Mission:
     @classmethod
     def from_csv(cls, file_name: str):
         # You are required to implement this method
-        reference = []
+        #generate empty lists to hold the data read from the CSV file
+        reference = []               
         cave_height = []
         cave_depth = []
         pass

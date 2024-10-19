@@ -1,3 +1,49 @@
-%%%
-/begin{document}
-%%%
+\documentclass[hidelinks]{article}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% START CUSTOM INCLUDES & DEFINITIONS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\usepackage{parskip} %noident everywhere
+\usepackage{hyperref} % Show hyperlinks - claudio
+\hypersetup{
+    colorlinks = true
+    linkcolor = blue
+    urlcolor = red
+    }
+\usepackage{fancyhdr, lastpage} % Headers and footers
+\pagestyle{fancy}
+\lhead{2024}
+\rhead{Claudio Vestini \& Idris Kempf} % hidden if full page
+\cfoot{Page \thepage\ of \pageref{LastPage}}
+\usepackage{subcaption}
+\usepackage{tabto}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% END CUSTOM INCLUDES & DEFINITIONS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\pdfobjcompresslevel=0
+%
+\title{Submarine Mission Report}
+\author{Claudio Vestini}
+\date{October 2024}
+\begin{document}
+\maketitle
+%
+\section{Introduction}
+This brief report will concern the B1 submarine coding practical.
+Initial steps taken before starting development:
+\begin{enumerate}
+    \item Create and activate a virtual environment with the given requirements (numpy, matplotlib and pandas packages)
+    \item Fork project repository to my GitHub account
+    \item Set up a .env file to add local packages onto python PATH
+    \item Make sure running files do not give any errors before branching off `main'
+\end{enumerate}
+%
+\section{Extracting Mission Data}
+The first step was to obtain mission data from the given .csv file. I started this by creating a new branch, and modifying the Mission class inside the new branch. I implemented a new classmethod to extract each column of the mission.csv file into a separate variable, and then return the data as an instance of the Mission class. I then tested the new functionality by making use of the Trajectory class's plotting methods. Once I made sure the new method was working correctly, I merged the branch back into `main', and deleted the unused branch.
+%
+\section{Controller Implementation}
+%
+\end{document}

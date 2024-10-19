@@ -88,7 +88,7 @@ class Mission:
                 reference.append(float(row[0]))     #add the data in the first coloumn of reach row to reference list
                 cave_height.append(float(row[1]))   #add the data in the second coloumn of reach row to cave height list
                 cave_depth.append(float(row[2]))    #add the data in the third coloumn of reach row to cave depth list
-
+        return cls(np.array(reference), np.array(cave_height), np.array(cave_depth)) #generate new mission instance using data read from CSV
         pass
 
 

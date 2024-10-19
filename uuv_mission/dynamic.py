@@ -83,6 +83,11 @@ class Mission:
         cave_depth = []
         with open(file_name, 'r') as file: # open csv file in read mode
             reader = csv.reader(file)      #initialise CSV reader to read the file
+            for row in reader:
+                reference.append(float(row[0]))     #add the data in the first coloumn of reach row to reference list
+                cave_height.append(float(row[1]))   #add the data in the second coloumn of reach row to cave height list
+                cave_depth.append(float(row[2]))    #add the data in the third coloumn of reach row to cave depth list
+
         pass
 
 

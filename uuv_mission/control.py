@@ -1,5 +1,5 @@
 import numpy as np
 
-def controller():
+class Controller():
 
     pass

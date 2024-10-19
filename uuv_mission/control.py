@@ -1,4 +1,4 @@
-class Controller:
+class controller:
     def __init__(self, Kp, Kd):      #initialise PD controller with gains and error
         self.Kp = Kp
         self.Kd = Kd

@@ -81,6 +81,8 @@ class Mission:
         reference = []               
         cave_height = []
         cave_depth = []
+        with open(file_name, 'r') as file: # open csv file in read mode
+            reader = csv.reader(file)      #initialise CSV reader to read the file
         pass
 
 

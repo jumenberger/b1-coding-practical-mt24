@@ -20,7 +20,7 @@ class PDController(Controller):
     def compute_control_action(self, x0: np.ndarray, reference: np.ndarray) -> np.ndarray:
 
         error = reference - self.C @ x0
-        derivative = (error - self.previous_error) / self.A[1, 1]  # Assuming dt = 1 for simplicity
+        derivative = (error - self.previous_error) / self.A[1, 1]  # assuming dt = 1 for simplicity
         
         u = self.Kp * error + self.Kd * derivative
         self.previous_error = error

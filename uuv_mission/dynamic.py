@@ -1,6 +1,7 @@
-#from __future__ import annotations
+# from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
 
@@ -40,6 +41,30 @@ class Submarine:
         self.vel_y = 0
 
 
+@dataclass
+class Mission:
+    reference: np.ndarray
+    cave_height: np.ndarray
+    cave_depth: np.ndarray
+
+    @classmethod
+    def random_mission(cls, duration: int, scale: float):
+        (reference, cave_height, cave_depth) = generate_reference_and_limits(
+            duration, scale
+        )
+        return cls(reference, cave_height, cave_depth)
+
+    @classmethod
+    def from_csv(cls, file_name: str):
+        data = pd.read_csv(file_name, header=0)
+        npData = data.to_numpy()
+        reference = npData[:, 0].astype(float)
+        cave_height = npData[:, 1].astype(float)
+        cave_depth = npData[:, 2].astype(float)
+
+        return cls(reference, cave_height, cave_depth)
+
+
 class Trajectory:
     def __init__(self, position: np.ndarray):
         self.position = position
@@ -74,25 +99,6 @@ class Trajectory:
         plt.plot(mission.reference, "r", linestyle="--", label="Reference")
         plt.legend(loc="upper right")
         plt.show()
-
-
-@dataclass
-class Mission:
-    reference: np.ndarray
-    cave_height: np.ndarray
-    cave_depth: np.ndarray
-
-    @classmethod
-    def random_mission(cls, duration: int, scale: float):
-        (reference, cave_height, cave_depth) = generate_reference_and_limits(
-            duration, scale
-        )
-        return cls(reference, cave_height, cave_depth)
-
-    @classmethod
-    def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
 
 
 class ClosedLoop:

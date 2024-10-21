@@ -49,7 +49,7 @@ class Trajectory:
         plt.plot(self.position[:, 0], self.position[:, 1])
         plt.show()
 
-    def plot_completed_mission(self, mission: Mission):
+    def plot_completed_mission(self, mission: Mission, controller: Controller):
         x_values = np.arange(len(mission.reference))
         min_depth = np.min(mission.cave_depth)
         max_height = np.max(mission.cave_height)
@@ -62,6 +62,11 @@ class Trajectory:
         plt.plot(self.position[:, 0], self.position[:, 1], label='Trajectory')
         plt.plot(mission.reference, 'r', linestyle='--', label='Reference')
         plt.legend(loc='upper right')
+
+        # Add text annotations for Kp, Kd, and Ki
+        textstr = f'Kp={controller.Kp}, Kd={controller.Kd}, Ki={controller.Ki}'
+        plt.gcf().text(0.15, 0.85, textstr, fontsize=12, bbox=dict(facecolor='white'))
+
         plt.show()
 
 @dataclass

@@ -7,16 +7,16 @@ from .terrain import generate_reference_and_limits
 class Submarine:
     def __init__(self):
 
-        self.mass = 1
+        self.mass = 1.
         self.drag = 0.1
-        self.actuator_gain = 1
+        self.actuator_gain = 1.
 
-        self.dt = 1 # Time step for discrete time simulation
+        self.dt = 1. # Time step for discrete time simulation
 
-        self.pos_x = 0
-        self.pos_y = 0
-        self.vel_x = 1 # Constant velocity in x direction
-        self.vel_y = 0
+        self.pos_x = 0.
+        self.pos_y = 0.
+        self.vel_x = 1. # Constant velocity in x direction
+        self.vel_y = 0.
 
 
     def transition(self, action: float, disturbance: float):
@@ -34,11 +34,21 @@ class Submarine:
         return self.pos_x, self.pos_y
     
     def reset_state(self):
-        self.pos_x = 0
-        self.pos_y = 0
-        self.vel_x = 1
-        self.vel_y = 0
-    
+        self.pos_x = 0.
+        self.pos_y = 0.
+        self.vel_x = 1.
+        self.vel_y = 0.
+
+    def get_dynamics(self):
+        
+        A = np.array([[0, 1], [0, -self.drag / self.mass]])
+        B = np.array([[0], [self.actuator_gain / self.mass]])
+        C = np.array([[1, 0]])
+        D = np.array([[0]])
+
+        return A, B, C, D
+
+
 class Trajectory:
     def __init__(self, position: np.ndarray):
         self.position = position  
@@ -99,10 +109,12 @@ class ClosedLoop:
 
         for t in range(T):
             positions[t] = self.plant.get_position()
+
             observation_t = self.plant.get_depth()
-            # Call your controller here
             reference_t = mission.reference[t]
-            action_t = self.controller.compute_control_action(np.array([self.plant.pos_x, self.plant.pos_y]), np.array([reference_t]))
+            x0 = np.array([observation_t, self.plant.pos_y])
+
+            action_t = self.controller.compute_control_action(x0, reference_t)
             actions[t] = action_t
             self.plant.transition(action_t, disturbances[t])
 

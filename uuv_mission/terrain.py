@@ -40,7 +40,7 @@ def plot_reference_and_terrain(reference, upper, lower):
     plt.show()
 
 def write_mission_to_csv(mission, file_name):
-    # Create a DataFrame from the Mission object's attributes
+
     data = {
         'reference': mission.reference,
         'cave_height': mission.cave_height,
@@ -48,5 +48,4 @@ def write_mission_to_csv(mission, file_name):
     }
     df = pd.DataFrame(data)
     
-    # Write the DataFrame to a CSV file
     df.to_csv(file_name, index=False)

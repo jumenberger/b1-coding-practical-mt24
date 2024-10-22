@@ -1,3 +1,5 @@
-from .dynamic import Submarine, Trajectory, Mission, ClosedLoop
+from .dynamic import Submarine, Mission, ClosedLoop, Trajectory
+from .control import PDController, MPCController
 
-__all__ = ['Submarine', 'Trajectory', 'Mission', 'ClosedLoop']
+__all__ = ['Submarine', 'Mission', 'ClosedLoop', 'Trajectory',
+           'PDController', 'MPCController']

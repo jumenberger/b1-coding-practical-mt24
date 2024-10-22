@@ -4,6 +4,7 @@
 % START CUSTOM INCLUDES & DEFINITIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
+\usepackage{amsmath}
 \usepackage{parskip} %noident everywhere
 \usepackage{hyperref} % Show hyperlinks - claudio
 \hypersetup{
@@ -11,13 +12,6 @@
     linkcolor = blue
     urlcolor = red
     }
-\usepackage{fancyhdr, lastpage} % Headers and footers
-\pagestyle{fancy}
-\lhead{2024}
-\rhead{Claudio Vestini \& Idris Kempf} % hidden if full page
-\cfoot{Page \thepage\ of \pageref{LastPage}}
-\usepackage{subcaption}
-\usepackage{tabto}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % END CUSTOM INCLUDES & DEFINITIONS
@@ -50,8 +44,53 @@ The first task was to obtain mission data from the given .csv file.
 \newline
 I started by creating a new branch to modify the Mission class within. I then implemented a new classmethod to extract each column of the mission.csv file into a separate variable, and then return the data as an instance of the Mission class.
 \newline
-The next step was to test the new functionality by making use of the Trajectory class's plotting methods. Once I made sure the new method was working correctly, I merged the branch back into `main', and deleted the unused branch.
+The next step was to test the new functionality by using the Trajectory class's plotting methods. Once I made sure the new method was working correctly, I merged the branch back into `main', and deleted the unused branch.
 %
 \section{Controller Implementation}
+To implement the PD controller, I first analysed the given code to infer the system's dynamics. The submarine progresses at constant speed in the $x$ direction, so needs only be controlled in the y direction (another hint to this is that we only have one set of reference values).
+\newline
+By inspection of the transition method, given drag $D$, velocity $V_y$, actuator input $u$ and disturbance $d$, the force in the vertical direction is given by:
+%
+\begin{equation}
+    F_y = - D \cdot V_y + K_{actuator} \cdot (u + d) \label{eq:force}
+\end{equation}
+%
+Combining \eqref{eq:force} with Newton's second law we obtain acceleration:
+%
+\begin{equation}
+    \frac{d^2y}{dt^2} = \frac{- D \cdot V_y}{m} + \frac{K_{actuator} \cdot (u + d)}{m} \label{eq:force}
+\end{equation}
+%
+It is then very simple to obtain all matrices for the state space dynamics in canonic form:
+\begin{equation}
+    \begin{aligned}
+        \dot{x}(t) &= A x(t) + B u(t) \\
+        y(t) &= C x(t) + D u(t)
+    \end{aligned}
+    \label{eq:statespace}
+\end{equation}
+%
+as:
+%
+\begin{equation}
+    \displaystyle
+    A = \begin{bmatrix}
+            0 & 1 \\
+            0 & -\frac{D}{m}
+        \end{bmatrix}; \quad
+    B = \begin{bmatrix}
+            0 \\
+            \frac{K_{actuator}}{m}
+        \end{bmatrix}; \quad
+    C = \begin{bmatrix}
+            1 \\
+            0
+          \end{bmatrix}; \quad
+    D = \begin{bmatrix}
+            0
+        \end{bmatrix}
+\end{equation}
+%
+The PD controller is then simply implemented
 %
 \end{document}

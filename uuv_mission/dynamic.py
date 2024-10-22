@@ -108,14 +108,17 @@ class ClosedLoop:
         self.plant.reset_state()
 
         for t in range(T):
-            positions[t] = self.plant.get_position()
+            positions[t] = self.plant.get_position() # for plotting only
 
+            # Assume the two observable states are position and velocity
             observation_t = self.plant.get_depth()
-            reference_t = mission.reference[t]
-            x0 = np.array([observation_t, self.plant.pos_y])
+            velocity_t = observation_t - positions[t-1, 1] if t > 0 else 0
+            x0 = np.array([observation_t, velocity_t])
 
+            reference_t = mission.reference[t]
             action_t = self.controller.compute_control_action(x0, reference_t)
             actions[t] = action_t
+            
             self.plant.transition(action_t, disturbances[t])
 
         return Trajectory(positions)

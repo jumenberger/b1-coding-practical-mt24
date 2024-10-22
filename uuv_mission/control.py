@@ -18,7 +18,7 @@ class PDController(Controller):
         self.Kd = Kd
         self.previous_error = 0.
 
-    def compute_control_action(self, x0: np.ndarray, reference: float) ->float:
+    def compute_control_action(self, x0: np.ndarray, reference: float) -> float:
 
         error = reference - self.C @ x0
         derivative = (error - self.previous_error)

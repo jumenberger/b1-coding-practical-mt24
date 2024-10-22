@@ -28,8 +28,8 @@
 %
 \pdfobjcompresslevel=0
 %
-\title{\vspace{-3cm} Submarine Mission Report}
-\author{\vspace{-1cm} Claudio Vestini}
+\title{\vspace{-4cm} Submarine Mission Report}
+\author{\vspace{-2cm} Claudio Vestini}
 \date{}
 \begin{document}
 \maketitle
@@ -40,25 +40,35 @@ we were tasked with designing the controller to guide a Submarine through its ca
 Preliminary steps taken before starting development:
 %
 \begin{enumerate}
-    \item Create and activate a virtual environment with the given requirements (numpy, matplotlib and pandas packages)
-    \item Fork project repository to my GitHub account
-    \item Set up a .env file to add local packages onto Python PATH
-    \item Make sure running files do not give any errors before branching off `main'
+    \item Create and activate a virtual environment with the given requirements (numpy, matplotlib and pandas packages).
+    \item Fork project repository to my GitHub account.
+    \item Set up a .env file to add local packages onto Python PATH.
+    \item Make sure running files do not give any errors before branching off `main'.
 \end{enumerate}
 %
 \paragraph{Mission Data}
-The first task was to obtain mission data from the given .csv file. This was achieved through the following steps:
+The first task was to obtain mission data from the given .csv file. I achieved this through the following steps:
 %
 \begin{enumerate}
     \setcounter{enumi}{4}
-    \item Create a new branch to modify the Mission class within
-    \item Implement a new classmethod to extract each column of the mission.csv file into a separate variable, then return the data as an instance of the Mission class
-    \item Test the new functionality by using the Trajectory class's plotting methods
-    \item Merge the branch back into `main', and delete the unused branch.
+    \item Create a new branch to modify the Mission class within.
+    \item Implement a new classmethod to extract each column of the mission.csv file into a separate variable, then return the data as an instance of the Mission class.
+    \item Test the new functionality by using the Trajectory class's plotting methods; then merge the branch back into `main', and delete the unused branch.
 \end{enumerate}
 %
 \paragraph{Controller}
-For full derivations, check Apppendix~\ref{appendix}
+The design of the controller necessitated a thorough understanding of the Submarine and ClosedLoop classes, both of which were to be modified.
+For full analysis, check Apppendix~\ref{appendix}. I completed my implementation as follows:
+%
+\begin{enumerate}
+    \setcounter{enumi}{7}
+    \item Create a new branch to avoid pushing error prone code to `main'.
+    \item Add a new method to the Submarine class to obtain the state space dynamics via matrices $A$, $B$, $C$ and $D$.
+    \item Inside of a new module named control.py, create a new Controller class, initialised with the four matrices above. Create a subclass PDController, which inherits the dynamics, and possesses additional class variables $K_P$ and $K_D$. For this subclass, develop a class method to compute the next control action $u[t]$ given observation $y[t]$ and reference $r[t]$.
+    \item Modify the ClosedLoop class to correctly call the controller within the simulate method.
+    \item Test the controller by using the given demo.ipynb file. Merge and delete the branch.
+\end{enumerate}
+My decision to use a hierarchical class system proved effective as it kept the codebase modular. It also allows for future development of any other type of controller: I subsequently developed another subclass MPCController, which was better at tracking the reference but required more computational effort.
 %
 \newpage
 \appendix

@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
 import pandas as pd
+from .controller import Controller
 
 class Submarine:
     def __init__(self):
@@ -75,14 +76,18 @@ class Mission:
         return cls(reference, cave_height, cave_depth)
 
     @classmethod
-    def from_csv(cls, file_name: str, col: int):
-        # You are required to implement this method
-        (reference, cave_height, cave_depth) = pd.read_csv(('../data/' + file_name), index_col = col)
+    def from_csv(cls, file_name: str):
+        data = pd.read_csv(file_name)
+        
+        reference = data['reference'].to_numpy()
+        cave_height = data['cave_height'].to_numpy()
+        cave_depth = data['cave_depth'].to_numpy()
+
         return cls(reference, cave_height, cave_depth)
 
 
 class ClosedLoop:
-    def __init__(self, plant: Submarine, controller):
+    def __init__(self, plant: Submarine, controller: Controller):
         self.plant = plant
         self.controller = controller
 
@@ -100,6 +105,18 @@ class ClosedLoop:
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
             # Call your controller here
+
+            # an exclusion is when t=0, there is no last error
+            if t==0:
+                lasterror = 0
+
+            #implement the controller
+            actions[t] = self.controller.KD_Controller(mission.reference[t], observation_t, lasterror)
+
+            #otherwise, the last error is the difference between the reference 
+            #and the observation at the previous time step
+            lasterror = mission.reference[t] - observation_t
+
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)

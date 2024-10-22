@@ -7,16 +7,16 @@ from .terrain import generate_reference_and_limits
 class Submarine:
     def __init__(self):
 
-        self.mass = 1
+        self.mass = 1.
         self.drag = 0.1
-        self.actuator_gain = 1
+        self.actuator_gain = 1.
 
-        self.dt = 1 # Time step for discrete time simulation
+        self.dt = 1. # Time step for discrete time simulation
 
-        self.pos_x = 0
-        self.pos_y = 0
-        self.vel_x = 1 # Constant velocity in x direction
-        self.vel_y = 0
+        self.pos_x = 0.
+        self.pos_y = 0.
+        self.vel_x = 1. # Constant velocity in x direction
+        self.vel_y = 0.
 
 
     def transition(self, action: float, disturbance: float):
@@ -34,11 +34,21 @@ class Submarine:
         return self.pos_x, self.pos_y
     
     def reset_state(self):
-        self.pos_x = 0
-        self.pos_y = 0
-        self.vel_x = 1
-        self.vel_y = 0
-    
+        self.pos_x = 0.
+        self.pos_y = 0.
+        self.vel_x = 1.
+        self.vel_y = 0.
+
+    def get_dynamics(self):
+        
+        A = np.array([[0, 1], [0, -self.drag / self.mass]])
+        B = np.array([[0], [self.actuator_gain / self.mass]])
+        C = np.array([[1, 0]])
+        D = np.array([[0]])
+
+        return A, B, C, D
+
+
 class Trajectory:
     def __init__(self, position: np.ndarray):
         self.position = position  
@@ -75,8 +85,11 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
+        data = np.genfromtxt(file_name, delimiter=',', skip_header=1)
+        reference = data[:, 0]
+        cave_height = data[:, 1]
+        cave_depth = data[:, 2]
+        return cls(reference, cave_height, cave_depth)
 
 
 class ClosedLoop:
@@ -95,10 +108,18 @@ class ClosedLoop:
         self.plant.reset_state()
 
         for t in range(T):
-            positions[t] = self.plant.get_position()
+            positions[t] = self.plant.get_position() # for plotting only
+
+            # Assume the two observable states are position and velocity
             observation_t = self.plant.get_depth()
-            # Call your controller here
-            self.plant.transition(actions[t], disturbances[t])
+            velocity_t = observation_t - positions[t-1, 1] if t > 0 else 0
+            x0 = np.array([observation_t, velocity_t])
+
+            reference_t = mission.reference[t]
+            action_t = self.controller.compute_control_action(x0, reference_t)
+            actions[t] = action_t
+            
+            self.plant.transition(action_t, disturbances[t])
 
         return Trajectory(positions)
         

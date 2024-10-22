@@ -87,7 +87,14 @@ class Mission:
                 cave_height.append(float(row[1]))
                 cave_depth.append(float(row[2]))
 
-        
+        # Convert lists to numpy arrays
+        reference = np.array(reference)
+        cave_height = np.array(cave_height)
+        cave_depth = np.array(cave_depth)
+
+        # Return an instance of Mission
+        return cls(reference, cave_height, cave_depth)
+        pass
 
 
 class ClosedLoop:

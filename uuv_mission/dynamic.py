@@ -2,7 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
-from .terrain import generate_reference_and_limits
+from terrain import generate_reference_and_limits
+import csv
+from control import PDController
 
 class Submarine:
     def __init__(self):
@@ -76,6 +78,18 @@ class Mission:
     @classmethod
     def from_csv(cls, file_name: str):
         # You are required to implement this method
+        #generate empty lists to hold the data read from the CSV file
+        reference = []               
+        cave_height = []
+        cave_depth = []
+        with open(file_name, 'r') as file: # open csv file in read mode
+            reader = csv.reader(file)      #initialise CSV reader to read the file
+            next(reader) #skip the first row in CSV (as it contains coloum headers)
+            for row in reader:
+                reference.append(float(row[0]))     #add the data in the first coloumn of reach row to reference list
+                cave_height.append(float(row[1]))   #add the data in the second coloumn of reach row to cave height list
+                cave_depth.append(float(row[2]))    #add the data in the third coloumn of reach row to cave depth list
+        return cls(np.array(reference), np.array(cave_height), np.array(cave_depth)) #generate new mission instance using data read from CSV
         pass
 
 
@@ -98,7 +112,11 @@ class ClosedLoop:
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
             # Call your controller here
+            error = mission.reference[t] - observation_t   
+            action = self.controller.compute(error)
+            actions[t]=action
             self.plant.transition(actions[t], disturbances[t])
+           
 
         return Trajectory(positions)
         

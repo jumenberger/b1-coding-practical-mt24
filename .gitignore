@@ -1,3 +1,8 @@
 .DS_Store
 .vscode/
+<<<<<<< HEAD
 __pycache__/
+venv/
+=======
+__pycache__/
+>>>>>>> d423aa10851a341bb416191f14724147c4bfba0a

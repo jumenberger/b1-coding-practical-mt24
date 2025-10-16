@@ -99,13 +99,17 @@ class ClosedLoop:
         self.plant.reset_state()
 
         for t in range(T):
-            positions[t] = self.plant.get_position()
+            
             observation_t = self.plant.get_depth()
             # Call your controller here
             error = mission.reference[t] - observation_t
-            prev_error = error[t-1] if t > 0 else 0
-            actions[t] = self.controller(error, prev_error)
-            self.plant.transition(actions[t], disturbances[t])
+            prev_error = errors[t-1] if t > 0 else 0
+            action = self.controller(error, prev_error)
+            self.plant.transition(action, disturbances[t])
+
+            positions[t] = self.plant.get_position()
+            actions[t] = action
+            errors[t] = error
 
         return Trajectory(positions)
         

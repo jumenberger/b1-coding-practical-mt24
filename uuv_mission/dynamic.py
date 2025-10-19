@@ -75,9 +75,12 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
-
+        # extracting data from the mission.csv
+        data = np.loadtxt(file_name, delimiter=',', skiprows=1)
+        reference = data[:, 0]
+        cave_height = data[:, 1]
+        cave_depth = data[:, 2]
+        return cls(reference, cave_height, cave_depth)
 
 class ClosedLoop:
     def __init__(self, plant: Submarine, controller):
@@ -92,13 +95,21 @@ class ClosedLoop:
         
         positions = np.zeros((T, 2))
         actions = np.zeros(T)
+        errors = np.zeros(T)
         self.plant.reset_state()
 
         for t in range(T):
-            positions[t] = self.plant.get_position()
+            
             observation_t = self.plant.get_depth()
             # Call your controller here
-            self.plant.transition(actions[t], disturbances[t])
+            error = mission.reference[t] - observation_t
+            prev_error = errors[t-1] if t > 0 else 0
+            action = self.controller(error, prev_error)
+            self.plant.transition(action, disturbances[t])
+
+            positions[t] = self.plant.get_position()
+            actions[t] = action
+            errors[t] = error
 
         return Trajectory(positions)
         

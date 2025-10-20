@@ -75,8 +75,29 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
+        # Load mission data from CSV file (reference, cave_height, cave_depth):
+        
+        import pandas as pd
+
+        # Read CSV
+        df = pd.read_csv(file_name)
+
+        # Check required columns
+        expected_cols = ["reference", "cave_height", "cave_depth"]
+        missing = [col for col in expected_cols if col not in df.columns]
+        if missing:
+            raise ValueError(f"Mission CSV is missing required columns: {missing}")
+
+        # Convert to numpy arrays (float) and ensure 1D vectors
+        reference = df["reference"].to_numpy(dtype=float)
+        cave_height = df["cave_height"].to_numpy(dtype=float)
+        cave_depth = df["cave_depth"].to_numpy(dtype=float)
+
+        # Basic shape/length validation
+        if not (len(reference) == len(cave_height) == len(cave_depth)):
+            raise ValueError("Columns in mission CSV must have the same length")
+
+        return cls(reference, cave_height, cave_depth)
 
 
 class ClosedLoop:

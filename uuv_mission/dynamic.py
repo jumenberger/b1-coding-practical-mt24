@@ -74,9 +74,17 @@ class Mission:
         return cls(reference, cave_height, cave_depth)
 
     @classmethod
-    def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
+    def from_csv(cls, file_name="../mission.csv"):
+        import pandas as pd
+        data = pd.read_csv(file_name)
+        return cls(
+            reference=data["reference"].values,
+            cave_height=data["cave_height"].values,
+            cave_depth=data["cave_depth"].values
+        )
+
+
+    
 
 
 class ClosedLoop:
@@ -84,23 +92,46 @@ class ClosedLoop:
         self.plant = plant
         self.controller = controller
 
-    def simulate(self,  mission: Mission, disturbances: np.ndarray) -> Trajectory:
+    def simulate(self, mission: Mission, disturbances: np.ndarray) -> dict:
+        import numpy as np
 
         T = len(mission.reference)
-        if len(disturbances) < T:
-            raise ValueError("Disturbances must be at least as long as mission duration")
-        
-        positions = np.zeros((T, 2))
+        positions = np.zeros(T)
         actions = np.zeros(T)
-        self.plant.reset_state()
 
+        # Loop over each timestep
         for t in range(T):
-            positions[t] = self.plant.get_position()
-            observation_t = self.plant.get_depth()
-            # Call your controller here
-            self.plant.transition(actions[t], disturbances[t])
+            if t % 10 == 0:
+                print(f"Step {t}, depth = {self.plant.get_depth():.2f}")
 
-        return Trajectory(positions)
+            # Reference and current depth
+            ref = mission.reference[t]
+            y = self.plant.get_depth()
+
+            # Compute control signal using the PD controller
+            u = self.controller.compute(ref, y)
+            u = np.clip(u, -10, 10)
+
+            # Apply disturbance if provided
+            if disturbances is not None and len(disturbances) > t:
+                disturbance = disturbances[t]
+            else:
+                disturbance = 0.0
+
+            # Update submarine model with control + disturbance
+            self.plant.transition(u, disturbance)
+
+            # Store results
+            positions[t] = self.plant.get_depth()
+            actions[t] = u
+
+        # Return results
+        return {"positions": positions, "actions": actions}
+
+
+
+
+
         
     def simulate_with_random_disturbances(self, mission: Mission, variance: float = 0.5) -> Trajectory:
         disturbances = np.random.normal(0, variance, len(mission.reference))

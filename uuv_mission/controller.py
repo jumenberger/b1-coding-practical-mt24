@@ -1,9 +1,9 @@
 # A PD controller in form u(t) = Kp*e(t) + Kd*(e(t) - e(t-1))
-class PDController:
+class Controller:
     def __init__(self, Kp: float, Kd: float):
         self.Kp = Kp
         self.Kd = Kd
-        self.prev_error = 0.0
+        self.prev_error = 0.0   # Initialize previous error to zero
     
     def compute_control(self, reference: float, measurement: float) -> float:
         error = reference - measurement

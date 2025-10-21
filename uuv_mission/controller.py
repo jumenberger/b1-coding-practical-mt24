@@ -2,6 +2,8 @@
 class Controller:
     def __init__(self):
         self.happy = True
+
+    # Define how the control action is computed
         
     def compute_control(self, reference, measurement, prev_reference, prev_measurement):
         self.Kp = 0.15

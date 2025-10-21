@@ -77,22 +77,9 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
+
         # Load mission data from CSV file (reference, cave_height, cave_depth):
         
-        
-        """"
-        # Read CSV
-        df = pd.read_csv(file_name)
-
-        # Check required columns
-        expected_cols = ["reference", "cave_height", "cave_depth"]
-        missing = [col for col in expected_cols if col not in df.columns]
-        if missing:
-            raise ValueError(f"Mission CSV is missing required columns: {missing}")
-
-        # Convert to numpy arrays (float) and ensure 1D vectors
-        
-        """
         reference = pd.read_csv(file_name)["reference"].to_numpy(dtype=float)
         cave_height = pd.read_csv(file_name)["cave_height"].to_numpy(dtype=float)
         cave_depth = pd.read_csv(file_name)["cave_depth"].to_numpy(dtype=float)
@@ -111,10 +98,12 @@ class ClosedLoop:
 
     def simulate(self,  mission: Mission, disturbances: np.ndarray) -> Trajectory:
 
+        # Check disturbances length is consistent with mission duration
         T = len(mission.reference)
         if len(disturbances) < T:
             raise ValueError("Disturbances must be at least as long as mission duration")
         
+        # Initialize storage for positions and actions
         positions = np.zeros((T, 2))
         actions = np.zeros(T)
         self.plant.reset_state()

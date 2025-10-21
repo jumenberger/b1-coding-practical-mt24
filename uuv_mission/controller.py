@@ -1,5 +1,5 @@
 # A PD controller in form u(t) = Kp*e(t) + Kd*(e(t) - e(t-1))
-class Controller:
+class controller:
     def __init__(self, Kp: float, Kd: float):
         self.Kp = Kp
         self.Kd = Kd

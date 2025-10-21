@@ -104,7 +104,7 @@ class Mission:
 class ClosedLoop:
     def __init__(self, plant: Submarine, controller):
         self.plant = plant
-        self.controller = controller
+        self.controller = controller(0.15, 0.6)
 
     def simulate(self,  mission: Mission, disturbances: np.ndarray) -> Trajectory:
 
@@ -119,8 +119,7 @@ class ClosedLoop:
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            PD_Controller = Controller(0.15, 0.6)     # Set up the controller, (Kp, Kd)
-            actions[t] = PD_Controller.compute_control(mission.reference[t], observation_t)     # Compute control action
+            actions[t] = self.controller.compute_control(mission.reference[t], observation_t)     # Compute control action
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)

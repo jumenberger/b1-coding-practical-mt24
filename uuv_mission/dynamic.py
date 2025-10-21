@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from terrain import generate_reference_and_limits
 from controller import Controller
@@ -78,8 +79,8 @@ class Mission:
     def from_csv(cls, file_name: str):
         # Load mission data from CSV file (reference, cave_height, cave_depth):
         
-        import pandas as pd
-
+        
+        """"
         # Read CSV
         df = pd.read_csv(file_name)
 
@@ -90,9 +91,11 @@ class Mission:
             raise ValueError(f"Mission CSV is missing required columns: {missing}")
 
         # Convert to numpy arrays (float) and ensure 1D vectors
-        reference = df["reference"].to_numpy(dtype=float)
-        cave_height = df["cave_height"].to_numpy(dtype=float)
-        cave_depth = df["cave_depth"].to_numpy(dtype=float)
+        
+        """
+        reference = pd.read_csv(file_name)["reference"].to_numpy(dtype=float)
+        cave_height = pd.read_csv(file_name)["cave_height"].to_numpy(dtype=float)
+        cave_depth = pd.read_csv(file_name)["cave_depth"].to_numpy(dtype=float)
 
         # Basic shape/length validation
         if not (len(reference) == len(cave_height) == len(cave_depth)):
@@ -104,7 +107,7 @@ class Mission:
 class ClosedLoop:
     def __init__(self, plant: Submarine, controller):
         self.plant = plant
-        self.controller = controller(0.15, 0.6)
+        self.controller = controller()
 
     def simulate(self,  mission: Mission, disturbances: np.ndarray) -> Trajectory:
 
@@ -119,7 +122,15 @@ class ClosedLoop:
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            actions[t] = self.controller.compute_control(mission.reference[t], observation_t)     # Compute control action
+            if t==0:
+                prev_obs = observation_t
+                prev_ref = mission.reference[t]
+            cur_ref = mission.reference[t]
+            actions[t] = self.controller.compute_control(cur_ref, observation_t, prev_ref, prev_obs)
+            
+            prev_obs = observation_t
+            prev_ref = mission.reference[t]
+            
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)

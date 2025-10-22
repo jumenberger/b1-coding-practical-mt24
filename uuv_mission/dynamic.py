@@ -1,7 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
+import sys
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt 
 from .terrain import generate_reference_and_limits
 
 class Submarine:
@@ -21,6 +22,7 @@ class Submarine:
 
     def transition(self, action: float, disturbance: float):
         self.pos_x += self.vel_x * self.dt
+
         self.pos_y += self.vel_y * self.dt
 
         force_y = -self.drag * self.vel_y + self.actuator_gain * (action + disturbance)
@@ -81,10 +83,14 @@ class Mission:
 
 class ClosedLoop:
     def __init__(self, plant: Submarine, controller):
+        sys.stdout.flush()
         self.plant = plant
         self.controller = controller
 
     def simulate(self,  mission: Mission, disturbances: np.ndarray) -> Trajectory:
+
+        import sys
+        sys.stdout.flush()
 
         T = len(mission.reference)
         if len(disturbances) < T:
@@ -93,15 +99,30 @@ class ClosedLoop:
         positions = np.zeros((T, 2))
         actions = np.zeros(T)
         self.plant.reset_state()
+        
+        # Reset controller
+        self.controller.reset()
+        sys.stdout.flush()
 
         for t in range(T):
             positions[t] = self.plant.get_position()
+            # Get current observation
             observation_t = self.plant.get_depth()
-            # Call your controller here
-            self.plant.transition(actions[t], disturbances[t])
+            reference_t = mission.reference[t]
+
+            # Compute control action
+            action_t = self.controller(reference_t, observation_t)
+
+            # Store and apply action
+            actions[t] = action_t
+            self.plant.transition(action_t, disturbances[t])
+
 
         return Trajectory(positions)
         
+        
+
     def simulate_with_random_disturbances(self, mission: Mission, variance: float = 0.5) -> Trajectory:
         disturbances = np.random.normal(0, variance, len(mission.reference))
         return self.simulate(mission, disturbances)
+   

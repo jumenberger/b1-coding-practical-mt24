@@ -5,4 +5,5 @@ Instructions are available on Canvas.
 
 Contributors: 
 Joseph Hindmarch
-Reece Sandhu
+ & Reece Sandhu
+

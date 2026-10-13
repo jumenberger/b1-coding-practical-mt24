@@ -2,3 +2,7 @@
 
 Coding practical task for the B1 Scientific Coding course at Oxford (MT26).
 Instructions are available on Canvas.
+
+Contributors: 
+Joseph Hindmarch
+Reece Sandhu

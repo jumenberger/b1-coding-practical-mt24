@@ -21,3 +21,7 @@ class PDController:
 
         # return control action
         return control_action
+
+    def reset(self):
+        """Reset the controller to its initial state."""
+        self.prev_error = 0.0

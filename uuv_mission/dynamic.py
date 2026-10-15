@@ -1,6 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from typing import Protocol
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
 
@@ -75,8 +77,10 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
-        # You are required to implement this method
-        pass
+        df = pd.read_csv(file_name)
+        return cls(df['reference'].to_numpy(),
+                   df['cave_height'].to_numpy(),
+                   df['cave_depth'].to_numpy())
 
 
 class ClosedLoop:

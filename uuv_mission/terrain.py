@@ -51,5 +51,9 @@ def write_mission_to_csv(mission, file_name):
     # Write the DataFrame to a CSV file
     df.to_csv(file_name, index=False)
 
-
-    
+def import_from_csv(file_name):
+    df = pd.read_csv(file_name)
+    reference = df['reference'].to_numpy()
+    cave_height = df['cave_height'].to_numpy()
+    cave_depth = df['cave_depth'].to_numpy()
+    return reference, cave_height, cave_depth

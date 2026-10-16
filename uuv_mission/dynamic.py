@@ -1,12 +1,12 @@
 from __future__ import annotations
 from dataclasses import dataclass
-import numpy as np
+import numpy as np 
+import pandas as pd
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
 
 class Submarine:
     def __init__(self):
-
         self.mass = 1
         self.drag = 0.1
         self.actuator_gain = 1
@@ -42,7 +42,6 @@ class Submarine:
 class Trajectory:
     def __init__(self, position: np.ndarray):
         self.position = position  
-        
     def plot(self):
         plt.plot(self.position[:, 0], self.position[:, 1])
         plt.show()
@@ -76,8 +75,13 @@ class Mission:
     @classmethod
     def from_csv(cls, file_name: str):
         # You are required to implement this method
+        
+        data = pd.read_csv(mission)
+        reference = data["reference"].to_numpy()
+        cave_height = data["cave_height"].to_numpy() 
+        cave_depth = data["cave_depth"].to_numpy()
+          return cls(reference, cave_height, cave_depth)
         pass
-
 
 class ClosedLoop:
     def __init__(self, plant: Submarine, controller):
@@ -97,9 +101,9 @@ class ClosedLoop:
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
-            # Call your controller here
+            # Call your controller here 
+            actions[t] = self.controller.update(mission.reference[t], observation_t) 
             self.plant.transition(actions[t], disturbances[t])
-
         return Trajectory(positions)
         
     def simulate_with_random_disturbances(self, mission: Mission, variance: float = 0.5) -> Trajectory:

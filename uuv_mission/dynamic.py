@@ -76,7 +76,6 @@ class Mission:
 
     @classmethod
     def from_csv(cls, file_name: str):
-        file_name = "mission.csv"
         data = pd.read_csv(file_name)
         reference = data['reference'].tolist()
         cave_height = data['cave_height'].tolist()

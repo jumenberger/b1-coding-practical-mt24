@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from .terrain import generate_reference_and_limits
 
+from .control import PDcontroller
+
 import pandas as pd
 
 class Submarine:
@@ -89,12 +91,12 @@ class Mission:
         return cls(reference, cave_height, cave_depth)
 
 class ClosedLoop:
-    def __init__(self, plant: Submarine, controller):
+    def __init__(self, plant: Submarine, controller: PDcontroller):
         # constructor method for creating a new closed loop object
         
         self.plant = plant
 
-        # hold the controller implementation within this object
+        # hold the controller implementation within this object (use PD controller obejct)
         self.controller = controller
 
     def simulate(self,  mission: Mission, disturbances: np.ndarray) -> Trajectory:
@@ -110,13 +112,14 @@ class ClosedLoop:
         for t in range(T):
             positions[t] = self.plant.get_position()
             observation_t = self.plant.get_depth()
+            
             # Call your controller here
+
+            actions[t] = self.controller.get_action(mission.reference[t], observation_t)
 
             self.plant.transition(actions[t], disturbances[t])
 
         return Trajectory(positions)
-
-
         
     def simulate_with_random_disturbances(self, mission: Mission, variance: float = 0.5) -> Trajectory:
         disturbances = np.random.normal(0, variance, len(mission.reference))

@@ -76,17 +76,20 @@ class Mission:
     def from_csv(cls, file_name: str):
         # You are required to implement this method
         
-        data = pd.read_csv(mission)
+        data = pd.read_csv(file_name)
         reference = data["reference"].to_numpy()
         cave_height = data["cave_height"].to_numpy() 
         cave_depth = data["cave_depth"].to_numpy()
-          return cls(reference, cave_height, cave_depth)
+        return cls(reference, cave_height, cave_depth)
         pass
 
 class ClosedLoop:
-    def __init__(self, plant: Submarine, controller):
+    def __init__(self, plant, controller):
         self.plant = plant
         self.controller = controller
+
+    def getdepth(self):
+        return self.plant.get_depth()
 
     def simulate(self,  mission: Mission, disturbances: np.ndarray) -> Trajectory:
 
@@ -100,7 +103,7 @@ class ClosedLoop:
 
         for t in range(T):
             positions[t] = self.plant.get_position()
-            observation_t = self.plant.get_depth()
+            observation_t = self.getdepth()
             # Call your controller here 
             actions[t] = self.controller.update(mission.reference[t], observation_t) 
             self.plant.transition(actions[t], disturbances[t])
